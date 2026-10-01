@@ -6,7 +6,7 @@ import subprocess
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from app import catalog
+from app import catalog, pricing
 from app.logging_setup import configure_logging
 
 configure_logging()
@@ -69,3 +69,8 @@ def _order_or_404(order_id: int):
 @app.get("/orders/{order_id}")
 def get_order(order_id: int):
     return _order_or_404(order_id)
+
+
+@app.get("/orders/{order_id}/total")
+def order_total(order_id: int):
+    return pricing.compute_total(_order_or_404(order_id))
