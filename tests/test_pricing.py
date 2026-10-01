@@ -10,3 +10,9 @@ def test_total_includes_gst():
     assert result["subtotal"] == 15999.00
     assert result["tax"] == round(15999.00 * 0.18, 2)
     assert result["total"] == round(15999.00 * 1.18, 2)
+
+
+def test_welcome_coupon_discount():
+    result = pricing.compute_total(catalog.get_order(1002), "WELCOME10")
+    assert result["discount"] == round(15999.00 * 0.10, 2)
+    assert result["coupon"] == "WELCOME10"
