@@ -6,7 +6,7 @@ import subprocess
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from app import catalog, pricing
+from app import catalog, payments, pricing
 from app.logging_setup import configure_logging
 
 configure_logging()
@@ -75,3 +75,15 @@ def get_order(order_id: int):
 def order_total(order_id: int, coupon: str | None = None):
     order = _order_or_404(order_id)
     return pricing.compute_total(order, coupon)
+
+
+@app.post("/orders/{order_id}/pay")
+def pay_order(order_id: int):
+    order = _order_or_404(order_id)
+    amount = pricing.compute_total(order)["total"]
+    try:
+        receipt = payments.charge(order_id, amount)
+    except payments.PaymentGatewayTimeout as exc:
+        log.error("Payment gateway timeout for order %s: %s", order_id, exc)
+        raise HTTPException(status_code=503, detail="Payment gateway unavailable, please retry")
+    return receipt
