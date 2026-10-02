@@ -72,5 +72,6 @@ def get_order(order_id: int):
 
 
 @app.get("/orders/{order_id}/total")
-def order_total(order_id: int):
-    return pricing.compute_total(_order_or_404(order_id))
+def order_total(order_id: int, coupon: str | None = None):
+    order = _order_or_404(order_id)
+    return pricing.compute_total(order, coupon)
