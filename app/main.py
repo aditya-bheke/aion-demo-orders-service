@@ -2,6 +2,7 @@
 import logging
 import os
 import subprocess
+import time
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -29,14 +30,15 @@ COMMIT = _current_commit()
 
 @app.middleware("http")
 async def access_log(request: Request, call_next):
+    started = time.perf_counter()
     req = {"method": request.method, "path": request.url.path, "query": request.url.query}
     try:
         response = await call_next(request)
     except Exception:
-        req["status"] = 500
+        req.update(status=500, duration_ms=round((time.perf_counter() - started) * 1000, 2))
         log.exception("Unhandled exception while processing request", extra={"request": req})
         return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
-    req["status"] = response.status_code
+    req.update(status=response.status_code, duration_ms=round((time.perf_counter() - started) * 1000, 2))
     log.info("%s %s -> %s", request.method, request.url.path, response.status_code, extra={"request": req})
     return response
 
