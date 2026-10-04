@@ -13,7 +13,9 @@ def order_subtotal(order):
 
 
 def apply_discount(subtotal, coupon):
-    return round(subtotal * coupon["percent"] / 100, 2)
+    """Percentage discount, capped at the campaign's maximum discount."""
+    discount = subtotal * coupon["percent"] / 100
+    return round(min(discount, coupon["max_discount"]), 2)
 
 
 def compute_total(order, coupon_code=None):
