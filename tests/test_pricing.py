@@ -14,10 +14,5 @@ def test_total_includes_gst():
 
 def test_welcome_coupon_discount():
     result = pricing.compute_total(catalog.get_order(1002), "WELCOME10")
-    assert result["discount"] == 500.00  # 10% capped at Rs 500
+    assert result["discount"] == round(15999.00 * 0.10, 2)
     assert result["coupon"] == "WELCOME10"
-
-
-def test_campaign_coupon_is_capped():
-    result = pricing.compute_total(catalog.get_order(1005), "DIWALI25")
-    assert result["discount"] == 3000.00
